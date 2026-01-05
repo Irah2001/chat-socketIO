@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <title>Chat Sécurisé (JWT)</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="description" content="Chat Sécurisé (JWT) Galactic Robots" />
+    <meta name="author" content="Irina RASAMIARIMANANA" />
+    <link rel="stylesheet" href="style.css">
+    <script src="theme.js" defer></script>
+    <script src="https://cdn.socket.io/4.7.2/socket.io.min.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+</head>
+<body>
+
+    <nav>
+        <a href="index.html">Index</a>
+        <a href="chat.html" class="active">Chat</a>
+        <button id="theme-toggle" onclick="toggleTheme()"></button>
+    </nav>
+
+    <main>
+        <div id="login-screen">
+            <form id="login-form">
+                <div style="font-size: 40px; color: var(--primary); margin-bottom: 10px;">
+                    <i class="fas fa-comments"></i>
+                </div>
+                
+                <h2 id="login-title">Bienvenue</h2>
+                <p id="login-subtitle">Choisissez un pseudo pour rejoindre le chat.</p>
+                
+                <input type="text" id="login-username" placeholder="Votre pseudo" required autocomplete="username">
+                
+                <div id="password-container" style="display: none;">
+                    <input type="password" id="login-password" placeholder="Mot de passe Admin" autocomplete="current-password">
+                </div>
+                
+                <button type="submit" id="login-btn">
+                    Rejoindre <i class="fas fa-arrow-right" style="margin-left: 5px;"></i>
+                </button>
+                
+                <div id="login-error">
+                    <i class="fas fa-exclamation-circle"></i> <span id="error-text">Erreur</span>
+                </div>
+
+                <div style="margin-top: 20px; font-size: 12px;">
+                    <a href="#" id="toggle-admin" style="color: var(--text-light); text-decoration: none;">
+                        <i class="fas fa-lock"></i> Accès Administrateur
+                    </a>
+                </div>
+            </form>
+        </div>
+
+        <div id="chat-container" style="display: none;">
+            <div id="rooms-nav">
+                <h3>Salons</h3>
+                <div id="rooms-list"></div>
+                
+                <div id="admin-panel" class="admin-controls">
+                    <h4>Admin Zone</h4>
+                    <input type="text" id="new-room-name" placeholder="Nom nouvelle salle">
+                    <button id="btn-create-room">Créer Salle</button>
+                </div>
+
+                <div class="logout-container">
+                    <button id="btn-logout" class="logout-btn">
+                        <i class="fas fa-sign-out-alt"></i> Déconnexion
+                    </button>
+                </div>
+            </div>
+
+            <div id="main-chat">
+                <div id="chat-header">
+                    <i class="fas fa-hashtag"></i> <span id="current-room-name">...</span>
+                </div>
+                <div id="messages"></div>
+                <div id="typing-indicator"></div>
+                <form id="message-form">
+                    <input type="text" id="message-input" placeholder="Message..." required autocomplete="off">
+                    <button type="submit"><i class="fas fa-paper-plane"></i></button>
+                </form>
+            </div>
+
+            <div id="user-list-container">
+                <div style="padding: 10px; border-bottom: 1px solid var(--border); background: var(--bg);">
+                    <h4 style="margin: 0 0 5px 0; font-size: 12px; color: var(--text-light);">Mon Profil</h4>
+                    <div style="display: flex; gap: 5px;">
+                        <input type="text" id="new-nickname-input" placeholder="Nouveau pseudo" style="width: 100%; padding: 5px; font-size: 12px;">
+                        <button id="btn-change-nick" style="padding: 5px 8px; font-size: 12px; margin: 0;">OK</button>
+                    </div>
+                </div>
+
+                <h3>En ligne</h3>
+                <ul id="user-list"></ul>
+            </div>
+        </div>
+    </main>
+
+    <script src="chat.js"></script> 
+</body>
+</html>

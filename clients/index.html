@@ -1,0 +1,216 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <title>Documentation API - Chat Temps Réel</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="author" content="Irina RASAMIARIMANANA" />
+    <meta name="description" content="Documentation technique du Chat Galactic Robots" />
+    <link rel="stylesheet" href="style.css">
+    <script src="theme.js" defer></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+</head>
+
+<body>
+
+    <nav>
+        <a href="index.html" class="active">Doc API</a>
+        <a href="chat.html">Chat App</a>
+        <button id="theme-toggle" onclick="toggleTheme()"></button>
+    </nav>
+
+    <main>
+        <h1><i class="fas fa-book"></i> Documentation API & WebSocket</h1>
+        <p>Référence technique pour l'application de Chat en temps réel (NestJS + Socket.io + Redis).</p>
+
+        <div class="doc-section">
+            <h2>1. Authentification (HTTP)</h2>
+            <p>Ces routes permettent de récupérer un <code>access_token</code> (JWT) nécessaire pour la connexion Socket.</p>
+
+            <div class="endpoint-card">
+                <div class="endpoint-header">
+                    <span class="method post">POST</span>
+                    <span class="path">/auth/login</span>
+                    <span class="desc">Connexion avec mot de passe (Admin/User)</span>
+                </div>
+                <div class="endpoint-body">
+                    <table class="param-table">
+                        <tr><th>Champ</th><th>Type</th><th>Description</th></tr>
+                        <tr><td>username</td><td>string</td><td>Identifiant (ex: 'admin')</td></tr>
+                        <tr><td>password</td><td>string</td><td>Mot de passe (ex: 'adminpassword')</td></tr>
+                    </table>
+                    <strong>Réponse 201 Created :</strong>
+                    <pre>{
+  "access_token": "eyJhbGciOiJIUz...",
+  "username": "admin",
+  "role": "admin"
+}</pre>
+                </div>
+            </div>
+
+            <div class="endpoint-card">
+                <div class="endpoint-header">
+                    <span class="method post">POST</span>
+                    <span class="path">/auth/guest</span>
+                    <span class="desc">Connexion Invité (Sans mot de passe)</span>
+                </div>
+                <div class="endpoint-body">
+                    <table class="param-table">
+                        <tr><th>Champ</th><th>Type</th><th>Description</th></tr>
+                        <tr><td>username</td><td>string</td><td>Pseudo souhaité (min 3 chars)</td></tr>
+                    </table>
+                    <strong>Réponse 201 Created :</strong>
+                    <pre>{
+  "access_token": "eyJhbGciOiJIUz...",
+  "username": "Invité123",
+  "role": "user"
+}</pre>
+                </div>
+            </div>
+        </div>
+
+        <div class="doc-section">
+            <h2>2. WebSocket : Émissions (Client ➔ Serveur)</h2>
+            <p>Événements envoyés par le client via <code>socket.emit('event', payload)</code>.</p>
+
+            <div class="endpoint-card">
+                <div class="endpoint-header">
+                    <span class="method socket-emit">EMIT</span>
+                    <span class="path">joinRoom</span>
+                    <span class="desc">Rejoindre un salon spécifique</span>
+                </div>
+                <div class="endpoint-body">
+                    <pre>socket.emit('joinRoom', 'Lobby');</pre>
+                </div>
+            </div>
+
+            <div class="endpoint-card">
+                <div class="endpoint-header">
+                    <span class="method socket-emit">EMIT</span>
+                    <span class="path">message</span>
+                    <span class="desc">Envoyer un message au salon actuel</span>
+                </div>
+                <div class="endpoint-body">
+                    <pre>socket.emit('message', { 
+  "content": "Bonjour tout le monde !" 
+});</pre>
+                </div>
+            </div>
+
+            <div class="endpoint-card">
+                <div class="endpoint-header">
+                    <span class="method socket-emit">EMIT</span>
+                    <span class="path">typing</span>
+                    <span class="desc">Indiquer l'activité de frappe</span>
+                </div>
+                <div class="endpoint-body">
+                    <pre>socket.emit('typing', true);  // Commence à écrire
+socket.emit('typing', false); // Arrête d'écrire</pre>
+                </div>
+            </div>
+
+            <div class="endpoint-card">
+                <div class="endpoint-header">
+                    <span class="method socket-emit">EMIT</span>
+                    <span class="path">createRoom</span>
+                    <span class="desc"><span class="badge badge-admin">ADMIN</span> Créer un nouveau salon</span>
+                </div>
+                <div class="endpoint-body">
+                    <pre>socket.emit('createRoom', 'Nouvelle Salle');</pre>
+                </div>
+            </div>
+
+            <div class="endpoint-card">
+                <div class="endpoint-header">
+                    <span class="method socket-emit">EMIT</span>
+                    <span class="path">deleteRoom</span>
+                    <span class="desc"><span class="badge badge-admin">ADMIN</span> Supprimer un salon existant</span>
+                </div>
+                <div class="endpoint-body">
+                    <pre>socket.emit('deleteRoom', 'Ancienne Salle');</pre>
+                </div>
+            </div>
+        </div>
+
+        <div class="doc-section">
+            <h2>3. WebSocket : Réceptions (Serveur ➔ Client)</h2>
+            <p>Événements écoutés par le client via <code>socket.on('event', callback)</code>.</p>
+
+            <div class="endpoint-card">
+                <div class="endpoint-header">
+                    <span class="method socket-on">ON</span>
+                    <span class="path">message</span>
+                    <span class="desc">Réception d'un nouveau message</span>
+                </div>
+                <div class="endpoint-body">
+                    <pre>{
+  "sender": "admin",
+  "role": "admin",
+  "content": "Bienvenue sur le chat",
+  "timestamp": "2023-10-27T10:00:00.000Z",
+  "room": "Lobby"
+}</pre>
+                </div>
+            </div>
+
+            <div class="endpoint-card">
+                <div class="endpoint-header">
+                    <span class="method socket-on">ON</span>
+                    <span class="path">roomList</span>
+                    <span class="desc">Mise à jour de la liste des salons</span>
+                </div>
+                <div class="endpoint-body">
+                    <pre>["Lobby", "Support", "Privé A", "Général"]</pre>
+                </div>
+            </div>
+
+            <div class="endpoint-card">
+                <div class="endpoint-header">
+                    <span class="method socket-on">ON</span>
+                    <span class="path">users</span>
+                    <span class="desc">Liste des utilisateurs dans la salle</span>
+                </div>
+                <div class="endpoint-body">
+                    <pre>[
+  { "username": "admin", "role": "admin" },
+  { "username": "Invité42", "role": "user" }
+]</pre>
+                </div>
+            </div>
+
+            <div class="endpoint-card">
+                <div class="endpoint-header">
+                    <span class="method socket-on">ON</span>
+                    <span class="path">userTyping</span>
+                    <span class="desc">Notification d'écriture</span>
+                </div>
+                <div class="endpoint-body">
+                    <pre>{
+  "username": "admin",
+  "isTyping": true
+}</pre>
+                </div>
+            </div>
+        </div>
+
+        <div class="doc-section">
+            <h2>4. Fonctionnalités Avancées</h2>
+            <div class="grid">
+                <div class="card">
+                    <h3><i class="fas fa-server"></i> Redis Adapter</h3>
+                    <p>Load Balancing activé. Les messages sont synchronisés entre plusieurs instances du serveur via Pub/Sub Redis.</p>
+                </div>
+                <div class="card">
+                    <h3><i class="fas fa-stopwatch"></i> Anti-Flood</h3>
+                    <p>Cooldown de 1 seconde entre chaque message pour éviter le spam. Renvoie un événement <code>error</code> si dépassé.</p>
+                </div>
+                <div class="card">
+                    <h3><i class="fas fa-user-shield"></i> Rôles</h3>
+                    <p><strong>Admin:</strong> Création/Suppression de salles, accès au Support.<br><strong>User:</strong> Accès aux salles publiques et privées par défaut.</p>
+                </div>
+            </div>
+        </div>
+
+    </main>
+</body>
+</html>
